@@ -60,6 +60,10 @@ void mine(float x,float y,ArrayList<float[]>mines){
   xyt[2]=108;
   mines.add(xyt);
 }
+void rocket(float x, float y, float angle, ArrayList<float[]> rockets){
+  float[] xya={x,y,angle,30};
+  rockets.add(xya);
+}
 ArrayList <float[]> boom(float x,float y,ArrayList<float[]>zombies){
   fill(255,255,0);
   ellipse(x,y,100,100);
@@ -70,7 +74,7 @@ ArrayList <float[]> boom(float x,float y,ArrayList<float[]>zombies){
   for(int i=0;i<zombieSize;i++){
     xyh=zombies.get(i);
     damage=150-dist(x,y,xyh[0],xyh[1]);
-    if(damage>100)damage=100;
+    if(damage<0)damage=0;
     angle=atan2(xyh[1]-y,xyh[0]-x);
     
     xyh[0]+=cos(angle)*damage/10;
@@ -181,6 +185,7 @@ int frames=0;
 int fireRate=15;
 int fireRateTimer=0;
 int playerMines=5;
+int rocketCount;
 float[][] guns={//[weapon][attribute]
 {1,15,0,1,0,10,3,0,49},//0-glock
 {0,25,0,1,0,25,3,300,100},//1-M1 Garand
@@ -189,8 +194,10 @@ float[][] guns={//[weapon][attribute]
 {0,1,PI/45,1,0,30,10,5000,20},//4-MiniGun
 {0,20,0,1,1,20,10,5000,0}};//5-Rocket Launcher
 //attributes:0-if owned 1-frames per shot 2-spread 3-shots 4-if rocket 5-length 6-thinckness 7-cost 8-damage
-int gs=0; //gun selection. current held gun.
-float[] xyt=new float[3];
+int gs=5; //gun selection. current held gun.
+float[] xyt=new float[3];//mines read write
+float[] xya=new float[4];//rockets read write
+ArrayList<float[]> rockets=new ArrayList<float[]>();
 ArrayList<float[]> mines=new ArrayList<float[]>();//mines in world
 ArrayList<float[]> zombies=new ArrayList<float[]>();//holds the zombies, array holds x,y,health
 float[] xyh=new float[4];//used to take and add arrays to zombie arraylist
@@ -243,7 +250,7 @@ void draw() {
             if(guns[gs][4]==0){//if its not a rocket
               zombies=bullet(playerX, playerY, gunAngle,guns[gs][8], zombies);//shoot and test if it hits etc
             }else{//if it is a rocket
-             rocket(playerX, playerY, gunAngle);
+             rocket(playerX, playerY, gunAngle,rockets);
             }
          }
          fireRateTimer=int(guns[gs][1]);
@@ -251,7 +258,7 @@ void draw() {
     }
     fireRateTimer--;
     frames++;
-    if(frames%200==0){
+    if(frames%100==0){
       zombie();
     }
   
@@ -307,7 +314,27 @@ void draw() {
         mines.remove(i);
       }
     }
-  
+    rocketCount=rockets.size();
+    
+    for(int i=0; i<rocketCount;i++){
+      xya=rockets.get(i);
+      fill(0);
+      ellipse(xya[0],xya[1],5,5);
+      for(int j=0;j<zombies.size();j++){
+        xyh=zombies.get(j);
+        if(dist(xya[0],xya[1],xyh[0],xyh[1])<15||xya[3]<0){
+          zombies=boom(xya[0],xya[1],zombies);
+          rockets.remove(i);
+          rocketCount--;
+          break;
+        }
+      }
+      xya[0]+=cos(xya[2])*10;
+      xya[1]+=sin(xya[2])*10;
+      xya[3]--;
+      
+    }
+      
     if (playerHealth<=0) {//death code
       lives--;//one less life
       playerHealth=100;//reset player
@@ -332,7 +359,7 @@ void draw() {
       }
       zombies.remove(0);
       zombie();//spawn a new zombie to start the game again
-      menu=true;
+      gs++;
     }
   }
 }
