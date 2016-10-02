@@ -106,7 +106,11 @@ void zombie(float x, float y, int health){//un used overload to manually place z
   xyh[3]=0;
   zombies.add(xyh);
 }
+boolean button(int x1,int y1,int x2,int y2, mouseX, mouseY){
+  boolean returns;
+  if (
 
+}
 ArrayList<float[]> bullet(float x, float y, float angle,float damage, ArrayList<float[]>zombies) {//everything that is run when firing
   
   float range=dist(0, 0, width, height);//shoot just far enough to go from corner to opostie corner
