@@ -106,10 +106,9 @@ void zombie(float x, float y, int health){//un used overload to manually place z
   xyh[3]=0;
   zombies.add(xyh);
 }
-boolean button(int x1,int y1,int x2,int y2, mouseX, mouseY){
-  boolean returns;
-  if (
-
+boolean button(int x1,int y1,int x2,int y2, int mouseX, int mouseY){
+  boolean returns=(((x1<mouseX&&mouseX<x2)||(x2<mouseX&&mouseX<x2))&&((y1<mouseX&&mouseX<y2)||(y1<mouseY&&mouseY<y2)));
+  return returns;
 }
 ArrayList<float[]> bullet(float x, float y, float angle,float damage, ArrayList<float[]>zombies) {//everything that is run when firing
   
@@ -177,7 +176,13 @@ void keyReleased() {//if a key is released then set its bool to false
   if (key=='s') keys[2]=false;
   if (key=='d') keys[3]=false;
 }
- 
+void mousePressed(){
+  for(int i=0;i<guns.length;i++){
+    if (button(250,i*40+20,380,i*40+70,mouseX,mouseY)){
+      
+    }
+  }
+}
 boolean menu=false;
 boolean[] keys=new boolean[4];//used to hold key inputs
 int playerHealth=100;//start health of player
@@ -185,6 +190,7 @@ int playerSpeed=2;//player speed multiplier
 int lives=3;//player lives
 int points=0;
 int highScore=0;
+int money=0;
 int frames=0;
 int fireRate=15;
 int fireRateTimer=0;
@@ -235,7 +241,8 @@ float playerY=200;//put player x and y in middle of screen
 void draw() {
   
   if(menu){
-    background(255);//draw a white back
+    background(666666);//draw a back
+    
   }else{
     image(background,0,0,width/2,height/2);
     image(background,width/2,0,width/2,height/2);
@@ -363,7 +370,7 @@ void draw() {
       }
       zombies.remove(0);
       zombie();//spawn a new zombie to start the game again
-      gs++;
+      menu=true;
     }
   }
 }
