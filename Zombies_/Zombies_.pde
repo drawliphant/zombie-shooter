@@ -88,7 +88,7 @@ ArrayList <float[]> boom(float x,float y,ArrayList<float[]>zombies){
         i--;
         zombieSize--;
         points++;
-        money++;
+        money+=2;
         zombie();
         if (points>highScore){
           highScore=points;
@@ -138,7 +138,7 @@ ArrayList<float[]> bullet(float x, float y, float angle,float damage, ArrayList<
         zombies.remove(i);
         i--;
         points++;
-        money++;
+        money+=2;
         zombie();
         if (points>highScore){
           highScore=points;
@@ -167,7 +167,7 @@ void keyPressed() {//sets bool to true if the key is pressed
   if (key=='a') keys[1]=true;
   if (key=='s') keys[2]=true;
   if (key=='d') keys[3]=true;
-  if(key==' '&&playerMines>0){//spawn a zombie at a random wall when you press space
+  if(key==' '&&playerMines>0){//spawn a mine when you press space
     mine(playerX,playerY,mines);
     playerMines--;
   }
