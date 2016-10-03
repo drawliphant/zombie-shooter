@@ -88,6 +88,7 @@ ArrayList <float[]> boom(float x,float y,ArrayList<float[]>zombies){
         i--;
         zombieSize--;
         points++;
+        money++;
         zombie();
         if (points>highScore){
           highScore=points;
@@ -120,7 +121,7 @@ ArrayList<float[]> bullet(float x, float y, float angle,float damage, ArrayList<
   line(x+cos(angle)*30, y+sin(angle)*30, x2, y2);//draw the bullet
   strokeWeight(6);
   stroke(255,255,0);
-  float rangle=random(-PI/8,PI/8);
+  float rangle=random(-PI/8,PI/8);//draw muzzle flash
   line(gunEndX,gunEndY,gunEndX+cos(angle+rangle)*20,gunEndY+sin(angle+rangle)*20);
   rangle=random(-PI/8,PI/8);
   line(gunEndX,gunEndY,gunEndX+cos(angle+rangle)*20,gunEndY+sin(angle+rangle)*20);
@@ -137,6 +138,7 @@ ArrayList<float[]> bullet(float x, float y, float angle,float damage, ArrayList<
         zombies.remove(i);
         i--;
         points++;
+        money++;
         zombie();
         if (points>highScore){
           highScore=points;
@@ -177,9 +179,15 @@ void keyReleased() {//if a key is released then set its bool to false
   if (key=='d') keys[3]=false;
 }
 void mousePressed(){
-  for(int i=0;i<guns.length;i++){
-    if (button(250,i*40+20,380,i*40+70,mouseX,mouseY)){
-      
+  if(menu){
+    //rect(10,220,60,30,10);
+    menu=!button(10,220,70,250,mouseX,mouseY);
+    for(int i=0;i<guns.length;i++){
+      if (button(250,i*60+20,380,i*60+70,mouseX,mouseY)&&money>guns[i][7]&&guns[i][0]==0){
+        guns[i][0]=1;
+        money-=guns[i][7]; 
+        gs=i;
+      }
     }
   }
 }
@@ -187,7 +195,7 @@ boolean menu=false;
 boolean[] keys=new boolean[4];//used to hold key inputs
 int playerHealth=100;//start health of player
 int playerSpeed=2;//player speed multiplier
-int lives=3;//player lives
+int lives=0;//player lives
 int points=0;
 int highScore=0;
 int money=0;
@@ -196,15 +204,16 @@ int fireRate=15;
 int fireRateTimer=0;
 int playerMines=5;
 int rocketCount;
+String[] wNames={"Glock 19","M1 Garand","Spaz 12","AK 47","Minigun","Grenade launcher"};
 float[][] guns={//[weapon][attribute]
 {1,15,0,1,0,10,3,0,49},//0-glock
 {0,25,0,1,0,25,3,300,100},//1-M1 Garand
 {0,25,PI/45,5,0,20,5,500,33},//2-Shotgun
-{0,5,PI/90,1,0,25,4,1000,49},//3-AK 47
+{0,5,PI/90,1,0,25,4,1200,49},//3-AK 47
 {0,1,PI/45,1,0,30,10,5000,20},//4-MiniGun
 {0,20,0,1,1,20,10,5000,0}};//5-Rocket Launcher
 //attributes:0-if owned 1-frames per shot 2-spread 3-shots 4-if rocket 5-length 6-thinckness 7-cost 8-damage
-int gs=5; //gun selection. current held gun.
+int gs=0; //gun selection. current held gun.
 float[] xyt=new float[3];//mines read write
 float[] xya=new float[4];//rockets read write
 ArrayList<float[]> rockets=new ArrayList<float[]>();
@@ -223,8 +232,8 @@ PImage ak_47;
 PImage minigun;
 PImage rocket;
 void setup() {
-  size(400, 400);//screen size, everything should be scalable with height and width
-  frameRate(30);
+  size(400, 400,P2D);//screen size, everything should be scalable with height and width
+  frameRate(40);
   zombie();
   strokeWeight(3);
   background = loadImage("back.jpg");//load images
@@ -241,7 +250,47 @@ float playerY=200;//put player x and y in middle of screen
 void draw() {
   
   if(menu){
-    background(666666);//draw a back
+    background(66,66,66);//draw a back
+    text ("$"+money,20,40);
+    
+    image(glock,250-90,20);
+    image(m1g,100,90);
+    image(shotgun,250-174,140);
+    image(ak_47,250-166,200);
+    image(minigun,250-152,260);
+    image(rocket,250-166,320);
+    
+    fill(70,0,255);
+    //draw a dude
+    ellipse(50,320,120,120);
+    fill(255);
+    ellipse(20,320,30,30);
+    ellipse(80,320,30,30);
+    fill(0);
+    ellipse(16,315,10,10);
+    ellipse(76,315,10,10);
+    line(45,360,70,350);
+    line(50,380,50,400);
+    
+    fill(255);
+    rect(10,220,60,30,10);
+    fill(0);
+    text("Ready?",17,239);
+    for(int i=0; i<guns.length;i++){
+      fill(50,50,155);
+      rect(250,i*60+20,130,50,10);
+      fill(255);
+      text(wNames[i],275,i*60+40);
+      text("cost $"+guns[i][7],275,i*60+60);
+      if(guns[i][0]==1){
+        fill(0,150);
+        rect(250,i*60+20,130,50,10);
+        fill(50,50,155);
+      }
+      
+    }
+    
+    
     
   }else{
     image(background,0,0,width/2,height/2);
@@ -357,11 +406,10 @@ void draw() {
       delay(1000);//wait a second to make you realize you is kill and you loose
       points=0;//reset points, frames and lives
       frames=0;
-      lives=3;
-      playerMines=5;
+      lives=0;
       int minenum=mines.size();//get the length of the zombie arraylist
-      for(int i=minenum-1; i>0;i--){//remove all zombies
-        mines.remove(i);
+      for(int i=minenum; i>0;i--){//remove all zombies
+        mines.remove(0);
       }
       
       int zombienum=zombies.size();//get the length of the zombie arraylist
