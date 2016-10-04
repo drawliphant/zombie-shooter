@@ -1,4 +1,6 @@
 import processing.sound.*;
+
+
 boolean hit(float x, float y, float x1, float y1, float x2, float y2) {
 //tests if the bullet line intersects with zombie
 //its all witchcraft
@@ -271,13 +273,13 @@ void setup() {
   ak_47=loadImage("ak_47.png");
   minigun=loadImage("minigun.png");
   rocket=loadImage("grenade_launcher.png");
-  explotion=new SoundFile(this,"explotion.wav");
-  wSound[0]=new SoundFile(this,"pistol.wav");
-  wSound[1]=new SoundFile(this,"rifle.wav");
-  wSound[2]=new SoundFile(this,"shotgun.wav");
-  wSound[3]=new SoundFile(this,"ak47.wav");
-  wSound[4]=new SoundFile(this,"minigun.wav");
-  wSound[5]=new SoundFile(this,"grenade-launcher.wav");
+  explotion=new SoundFile(this, "explotion.wav");
+  wSound[0]=new SoundFile(this, "pistol.wav");
+  wSound[1]=new SoundFile(this, "rifle.wav");
+  wSound[2]=new SoundFile(this, "shotgun.wav");
+  wSound[3]=new SoundFile(this, "ak47.wav");
+  wSound[4]=new SoundFile(this, "minigun.wav");
+  wSound[5]=new SoundFile(this, "grenade-launcher.wav");
   
 }
 float playerX=200;
@@ -351,9 +353,9 @@ void draw() {
             }
          }
          if(gs==5){
-           wSound[gs].loop();
+           //wSound[gs].loop();
          }else{
-           wSound[gs].play();
+           //wSound[gs].play();
          }
          fireRateTimer=int(guns[gs][1]);
       }
