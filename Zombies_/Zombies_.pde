@@ -1,3 +1,4 @@
+import processing.sound.*;
 boolean hit(float x, float y, float x1, float y1, float x2, float y2) {
 //tests if the bullet line intersects with zombie
 //its all witchcraft
@@ -65,6 +66,7 @@ void rocket(float x, float y, float angle, ArrayList<float[]> rockets){
   rockets.add(xya);
 }
 ArrayList <float[]> boom(float x,float y,ArrayList<float[]>zombies){
+  explotion.play();
   fill(255,255,0);
   ellipse(x,y,100,100);
   float[] xyh=new float[4];
@@ -196,7 +198,9 @@ void keyReleased() {//if a key is released then set its bool to false
 }
 void mousePressed(){
   if(menu){
-    //rect(10,220,60,30,10);
+    if(gs==4){
+      stop();
+    }
     menu=!button(10,220,70,250,mouseX,mouseY);
     for(int i=0;i<guns.length;i++){
       if (button(250,i*60+20,380,i*60+70,mouseX,mouseY)&&money>=guns[i][7]&&guns[i][0]==0){
@@ -222,6 +226,7 @@ int fireRateTimer=0;
 int playerMines=5;
 int rocketCount;
 int textTimer=0;
+
 String[] wNames={"Glock 19","M1 Garand","Spaz 12","AK 47","Minigun","Grenade launcher"};
 float[][] guns={//[weapon][attribute]
 {1,20,0,1,0,10,3,0,33},//0-glock
@@ -249,6 +254,8 @@ PImage shotgun;
 PImage ak_47;
 PImage minigun;
 PImage rocket;
+SoundFile[] wSound;
+SoundFile explotion;
 void setup() {
   size(400, 400);//screen size, everything should be scalable with height and width
   frameRate(40);
@@ -264,6 +271,14 @@ void setup() {
   ak_47=loadImage("ak_47.png");
   minigun=loadImage("minigun.png");
   rocket=loadImage("grenade_launcher.png");
+  explotion=new SoundFile(this,"explotion.wav");
+  wSound[0]=new SoundFile(this,"pistol.wav");
+  wSound[1]=new SoundFile(this,"rifle.wav");
+  wSound[2]=new SoundFile(this,"shotgun.wav");
+  wSound[3]=new SoundFile(this,"ak47.wav");
+  wSound[4]=new SoundFile(this,"minigun.wav");
+  wSound[5]=new SoundFile(this,"grenade-launcher.wav");
+  
 }
 float playerX=200;
 float playerY=200;//put player x and y in middle of screen
@@ -334,6 +349,11 @@ void draw() {
             }else{//if it is a rocket
              rocket(playerX, playerY, gunAngle,rockets);
             }
+         }
+         if(gs==5){
+           wSound[gs].loop();
+         }else{
+           wSound[gs].play();
          }
          fireRateTimer=int(guns[gs][1]);
       }
