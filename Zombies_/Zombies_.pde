@@ -161,7 +161,23 @@ void drawLegs (float x, float y, float angle ,float frame){
    line(x1,y1,x3,y3);
    line(x2,y2,x4,y4);
 }
-
+void mouseWheel(MouseEvent event){
+  textTimer=30;
+  gs-=event.getCount();
+  if(gs<0)gs+=6;
+  if(gs>5)gs-=6;
+  while(guns[gs][0]==0||gs<0||gs>6){
+  
+    if(event.getCount()>0){
+      gs--;
+    }else if(event.getCount()<0){
+      gs++;
+    }
+  
+    if(gs<0)gs+=6;
+    if(gs>6)gs-=6;
+  }
+}
 void keyPressed() {//sets bool to true if the key is pressed
   if (key=='w') keys[0]=true;
   if (key=='a') keys[1]=true;
@@ -199,29 +215,30 @@ int playerSpeed=2;//player speed multiplier
 int lives=0;//player lives
 int points=0;
 int highScore=0;
-int money=5000;
+int money=0;
 int frames=0;
 int fireRate=15;
 int fireRateTimer=0;
 int playerMines=5;
 int rocketCount;
+int textTimer=0;
 String[] wNames={"Glock 19","M1 Garand","Spaz 12","AK 47","Minigun","Grenade launcher"};
 float[][] guns={//[weapon][attribute]
-{0,25,0,1,0,10,3,0,33},//0-glock
-{0,30,0,1,0,25,3,200,100},//1-M1 Garand
-{0,25,PI/30,5,0,20,5,500,33},//2-Shotgun
-{0,5,PI/90,1,0,25,4,1200,49},//3-AK 47
-{0,1,PI/30,2,0,30,10,3000,5},//4-MiniGun
+{1,20,0,1,0,10,3,0,33},//0-glock
+{1,30,0,1,0,25,3,200,100},//1-M1 Garand
+{1,25,PI/30,5,0,20,5,500,33},//2-Shotgun
+{1,5,PI/90,1,0,25,4,1200,49},//3-AK 47
+{1,1,PI/30,2,0,30,10,3000,5},//4-MiniGun
 {1,15,0,1,1,20,10,5000,0}};//5-Rocket Launcher
 //attributes:0-if owned 1-frames per shot 2-spread 3-shots 4-if rocket 5-length 6-thinckness 7-cost 8-damage
-int gs=5; //gun selection. current held gun.
+int gs=0; //gun selection. current held gun.
 float[] xyt=new float[3];//mines read write
 float[] xya=new float[4];//rockets read write
 ArrayList<float[]> rockets=new ArrayList<float[]>();
 ArrayList<float[]> mines=new ArrayList<float[]>();//mines in world
 ArrayList<float[]> zombies=new ArrayList<float[]>();//holds the zombies, array holds x,y,health
 float[] xyh=new float[4];//used to take and add arrays to zombie arraylist
-
+int spawnrate=200;// amount of frames between each zombie spawn
 float zA;//used to make zombie walk toward player
 float gunAngle;
 float inacuracy;
@@ -235,6 +252,7 @@ PImage rocket;
 void setup() {
   size(400, 400);//screen size, everything should be scalable with height and width
   frameRate(40);
+  textSize(15);
   for(int i=0;i<15;i++){
     zombie();
   }
@@ -320,50 +338,6 @@ void draw() {
          fireRateTimer=int(guns[gs][1]);
       }
     }
-    fireRateTimer--;
-    frames++;
-    if(frames%200==0){
-      zombie();
-    }
-  
-    fill(500-playerHealth*5, 0, playerHealth*5);//player health shown by blue to red
-    ellipse(playerX, playerY, 25, 25);//draw player
-    gunAngle=atan2(mouseY-playerY,mouseX-playerX);
-    strokeWeight(guns[gs][6]);
-    line(playerX+cos(gunAngle)*15,playerY+sin(gunAngle)*15,playerX+cos(gunAngle)*(15+guns[gs][5]),playerY+sin(gunAngle)*(15+guns[gs][5]));
-    strokeWeight(3);
-    fill(0, 0, 255);//lives draw blue
-    for (int i=0; i<lives; i++) {
-      ellipse(i*15+15, 40, 10, 10);//draw lives circles
-    }
-    fill(0);
-    for (int i=0; i<playerMines; i++) {
-      stroke(0);
-      ellipse(i*15+15, 55, 10, 10);//draw mines circles
-      stroke(255,0,0);
-      point(i*15+15,55);
-    }
-    stroke(0);
-    fill(255);
-    text("points: "+points,8,15);
-    text("High Score: "+highScore,7,30);
-    
-    for (int i=0; i<zombies.size();i++){//run for every zombie
-      float[] xyh=zombies.get(i);//acces the array list at i
-      zA=atan2(playerY-xyh[1],playerX-xyh[0]);//find the angle between guy and zombie
-      fill(500-xyh[2]*4,xyh[2]*4 ,0);//color zombie by health, green full, red dead
-      drawLegs(xyh[0],xyh[1],zA,frames);
-      ellipse(xyh[0],xyh[1],25,25);//draw zombie
-      
-      //draw zombie arms
-      line(xyh[0]+cos(zA+PI/4)*13,xyh[1]+sin(zA+PI/4)*13,xyh[0]+cos(zA+PI/8)*25,xyh[1]+sin(zA+PI/8)*25);
-      line(xyh[0]+cos(zA-PI/4)*13,xyh[1]+sin(zA-PI/4)*13,xyh[0]+cos(zA-PI/8)*25,xyh[1]+sin(zA-PI/8)*25);
-      
-      xyh[0]+=cos(zA)*xyh[3];
-      xyh[1]+=sin(zA)*xyh[3];//move toward player by angle
-      if(xyh[3]<1)xyh[3]+=.2;
-      if(dist(xyh[0],xyh[1],playerX,playerY)<25)playerHealth--;//if you get to close the any zombie loose health
-    }
     for(int i=0;i<mines.size();i++){
       xyt=mines.get(i);
       fill(0);
@@ -397,6 +371,54 @@ void draw() {
       xya[1]+=sin(xya[2])*10;
       xya[3]--;
       
+    }
+    for (int i=0; i<zombies.size();i++){//run for every zombie
+      float[] xyh=zombies.get(i);//acces the array list at i
+      zA=atan2(playerY-xyh[1],playerX-xyh[0]);//find the angle between guy and zombie
+      fill(500-xyh[2]*4,xyh[2]*4 ,0);//color zombie by health, green full, red dead
+      drawLegs(xyh[0],xyh[1],zA,frames);
+      ellipse(xyh[0],xyh[1],25,25);//draw zombie
+      
+      //draw zombie arms
+      line(xyh[0]+cos(zA+PI/4)*13,xyh[1]+sin(zA+PI/4)*13,xyh[0]+cos(zA+PI/8)*25,xyh[1]+sin(zA+PI/8)*25);
+      line(xyh[0]+cos(zA-PI/4)*13,xyh[1]+sin(zA-PI/4)*13,xyh[0]+cos(zA-PI/8)*25,xyh[1]+sin(zA-PI/8)*25);
+      
+      xyh[0]+=cos(zA)*xyh[3];
+      xyh[1]+=sin(zA)*xyh[3];//move toward player by angle
+      if(xyh[3]<1)xyh[3]+=.2;
+      if(dist(xyh[0],xyh[1],playerX,playerY)<25)playerHealth--;//if you get to close the any zombie loose health
+    }
+    fill(500-playerHealth*5, 0, playerHealth*5);//player health shown by blue to red
+    ellipse(playerX, playerY, 25, 25);//draw player
+    gunAngle=atan2(mouseY-playerY,mouseX-playerX);
+    strokeWeight(guns[gs][6]);
+    line(playerX+cos(gunAngle)*15,playerY+sin(gunAngle)*15,playerX+cos(gunAngle)*(15+guns[gs][5]),playerY+sin(gunAngle)*(15+guns[gs][5]));
+    strokeWeight(3);
+    fill(0, 0, 255);//lives draw blue
+    for (int i=0; i<lives; i++) {
+      ellipse(i*15+15, 40, 10, 10);//draw lives circles
+    }
+    fill(0);
+    for (int i=0; i<playerMines; i++) {
+      stroke(0);
+      ellipse(i*15+15, 55, 10, 10);//draw mines circles
+      stroke(255,0,0);
+      point(i*15+15,55);
+    }
+    stroke(0);
+    fill(255);
+    text("Points: "+points,8,15);
+    text("High Score: "+highScore,7,35);
+    fireRateTimer--;
+    frames++;
+    spawnrate=140000/(frames+600)+50;
+    if(frames%spawnrate==0){
+      zombie();
+    }
+    if(textTimer>0){
+      fill(255);
+      textTimer--;
+      text("Weapon selected: "+wNames[gs],100,100);
     }
       
     if (playerHealth<=0) {//death code
